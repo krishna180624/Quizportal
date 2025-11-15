@@ -492,5 +492,184 @@ class AdminManager {
         if (!data.passing_marks || data.passing_marks < 1) {
             this.showAlert('Error', 'Passing marks must be at least 1');
             return false;
+        }
+
+        if (data.passing_marks > data.total_marks) {
+            this.showAlert('Error', 'Passing marks cannot be greater than total marks');
+            return false;
+        }
+
+        if (!data.start_time || !data.end_time) {
+            this.showAlert('Error', 'Start and end times are required');
+            return false;
+        }
+
+        if (new Date(data.start_time) >= new Date(data.end_time)) {
+            this.showAlert('Error', 'End time must be after start time');
+            return false;
+        }
+
+        return true;
+    }
+
+    editUser(userId) {
+        this.showAlert('Info', 'User editing feature coming soon');
+    }
+
+    deleteUser(userId, username) {
+        if (confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+            this.performDeleteUser(userId);
+        }
+    }
+
+    async performDeleteUser(userId) {
+        try {
+            const response = await fetch(`api/delete-user.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showAlert('Success', 'User deleted successfully');
+                if (this.currentTab === 'users') {
+                    this.loadUsers();
+                }
+            } else {
+                this.showAlert('Error', result.message);
+            }
+        } catch (error) {
+            console.error('Delete user error:', error);
+            this.showAlert('Error', 'Network error. Please try again.');
+        }
+    }
+
+    editExam(examId) {
+        this.showAlert('Info', 'Exam editing feature coming soon');
+    }
+
+    deleteExam(examId, examTitle) {
+        if (confirm(`Are you sure you want to delete exam "${examTitle}"? This action cannot be undone.`)) {
+            this.performDeleteExam(examId);
+        }
+    }
+
+    async performDeleteExam(examId) {
+        try {
+            const response = await fetch(`api/delete-exam.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ exam_id: examId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showAlert('Success', 'Exam deleted successfully');
+                if (this.currentTab === 'exams') {
+                    this.loadExams();
+                }
+            } else {
+                this.showAlert('Error', result.message);
+            }
+        } catch (error) {
+            console.error('Delete exam error:', error);
+            this.showAlert('Error', 'Network error. Please try again.');
+        }
+    }
+
+    viewResult(resultId) {
+        window.location.href = `results.html?result=${resultId}&admin=true`;
+    }
+
+    async generateReport(type) {
+        try {
+            this.showAlert('Info', 'Generating report...');
+
+            const response = await fetch(`api/generate-report.php?type=${type}`);
+            const result = await response.json();
+
+            if (result.success) {
+                // Create download link
+                const blob = new Blob([result.data], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${type}_report_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                this.showAlert('Success', 'Report generated and downloaded successfully');
+            } else {
+                this.showAlert('Error', result.message);
+            }
+        } catch (error) {
+            console.error('Generate report error:', error);
+            this.showAlert('Error', 'Network error. Please try again.');
+        }
+    }
+
+    closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
+
+    showAlert(title, message, type = 'info') {
+        const modal = document.getElementById('alert-modal');
+        const alertTitle = document.getElementById('alert-title');
+        const alertMessage = document.getElementById('alert-message');
+
+        alertTitle.textContent = title;
+        alertMessage.textContent = message;
+
+        modal.classList.add('show');
+
+        // Auto-hide after 3 seconds for non-critical alerts
+        if (type !== 'critical') {
+            setTimeout(() => {
+                this.closeModal('alert-modal');
+            }, 3000);
+        }
+    }
+
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    showLoading() {
+        // Loading state can be added if needed
+    }
+
+    hideLoading() {
+        // Hide loading state
+    }
+}
+
+// Global logout function
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        fetch('api/logout.php', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(result => {
+            window.location.href = 'index.html';
+        })
+        .catch(error => {
+            window.location.href = 'index.html';
+        });
+    }
+}
+
+// Initialize admin manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.adminManager = new AdminManager();
+});
 
 [Response interrupted by a tool use result. Only one tool may be used at a time and should be placed at the end of the message.]
