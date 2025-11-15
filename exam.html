@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam - Exam Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Additional styles for exam interface */
+        .exam-container {
+            height: calc(100vh - 150px);
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .exam-sidebar {
+            width: 280px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .exam-main {
+            flex: 1;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+        }
+
+        .exam-timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--warning-color);
+            text-align: center;
+            padding: 1rem;
+            background: rgba(243, 156, 18, 0.1);
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .exam-timer.warning {
+            color: var(--danger-color);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .question-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-nav-btn {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .question-nav-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .question-nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .question-nav-btn.answered {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .question-nav-btn.unanswered {
+            background: white;
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .exam-progress {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary-color);
+            transition: width 0.3s;
+        }
+
+        .exam-controls {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .full-screen-btn {
+            background: var(--dark-color);
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .question-content {
+            margin-bottom: 2rem;
+        }
+
+        .question-content h3 {
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .options-list {
+            margin-bottom: 2rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .option-item input[type="radio"],
+        .option-item input[type="checkbox"] {
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .option-label {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .text-answer {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .text-answer:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .exam-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        .btn-submit {
+            background: var(--secondary-color);
+            color: white;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+
+        .btn-submit:hover {
+            background: #27ae60;
+        }
+
+        /* Loading overlay for exam */
+        .exam-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            flex-direction: column;
+        }
+
+        .exam-loading .loading {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .exam-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .exam-sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .question-nav {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .exam-navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .exam-navigation .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">📚 Exam Portal</div>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="exam-container">
+            <!-- Sidebar -->
+            <div class="exam-sidebar">
+                <div class="exam-timer" id="exam-timer">
+                    <div>⏱️ Time Remaining</div>
+                    <div id="timer-display">--:--:--</div>
+                </div>
+
+                <h4>Question Navigation</h4>
+                <div class="question-nav" id="question-nav">
+                    <!-- Question navigation buttons will be generated here -->
+                </div>
+
+                <div class="exam-progress">
+                    <div><strong>Progress:</strong> <span id="progress-text">0/0</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="exam-controls">
+                    <button class="btn full-screen-btn" onclick="examManager.toggleFullscreen()">
+                        🖥️ Full Screen
+                    </button>
+                    <p style="font-size: 0.875rem; color: #666; margin-top: 1rem;">
+                        Questions marked as answered will appear in green. Current question is highlighted in blue.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="exam-main">
+                <!-- Loading State -->
+                <div class="exam-loading" id="exam-loading">
+                    <div class="loading"></div>
+                    <p>Loading exam questions...</p>
+                </div>
+
+                <!-- Exam Content -->
+                <div id="exam-content" style="display: none;">
+                    <div class="exam-header">
+                        <h2 id="exam-title">Exam Title</h2>
+                        <div>
+                            <span id="question-counter">Question 1 of 1</span>
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <h3 id="question-text">Loading question...</h3>
+
+                        <!-- Multiple Choice Options -->
+                        <div id="multiple-choice-options" class="options-list" style="display: none;">
+                            <!-- Options will be generated here -->
+                        </div>
+
+                        <!-- True/False Options -->
+                        <div id="true-false-options" class="options-list" style="display: none;">
+                            <!-- Options will be generated here -->
+                        </div>
+
+                        <!-- Short Answer -->
+                        <div id="short-answer-input" style="display: none;">
+                            <textarea id="short-answer-text" class="text-answer"
+                                      placeholder="Type your answer here..."
+                                      rows="6"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="exam-navigation">
+                        <button class="btn btn-secondary" id="prev-btn" onclick="examManager.previousQuestion()" disabled>
+                            ← Previous
+                        </button>
+
+                        <div id="middle-buttons">
+                            <button class="btn btn-secondary" onclick="examManager.markForReview()">
+                                📌 Mark for Review
+                            </button>
+                        </div>
+
+                        <div>
+                            <button class="btn btn-primary" id="next-btn" onclick="examManager.nextQuestion()">
+                                Next →
+                            </button>
+                            <button class="btn btn-submit" id="submit-btn" onclick="examManager.showSubmitConfirmation()" style="display: none;">
+                                Submit Exam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Submit Confirmation Modal -->
+    <div class="modal" id="submit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Submit Exam</h2>
+            </div>
+            <div class="modal-body">
+                <p><strong>Are you sure you want to submit your exam?</strong></p>
+                <div id="submit-summary" style="margin: 1rem 0; padding: 1rem; background: var(--background-color); border-radius: var(--border-radius);">
+                    <!-- Summary will be populated here -->
+                </div>
+                <p>Once submitted, you cannot make any changes to your answers.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="examManager.closeSubmitModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="examManager.submitExam()">Submit Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal" id="alert-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="alert-title">Notification</h2>
+            </div>
+            <div class="modal-body">
+                <p id="alert-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/exam.js"></script>
+</body>
+</html>
