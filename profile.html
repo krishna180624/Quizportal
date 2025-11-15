@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Exam Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-sidebar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: var(--background-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            margin-top: 1.5rem;
+        }
+
+        .profile-info h3 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-item .label {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .profile-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-color);
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .password-strength {
+            height: 5px;
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .password-strength.weak {
+            background: var(--danger-color);
+            width: 33%;
+        }
+
+        .password-strength.medium {
+            background: var(--warning-color);
+            width: 66%;
+        }
+
+        .password-strength.strong {
+            background: var(--secondary-color);
+            width: 100%;
+        }
+
+        .exam-history {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .history-item {
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-info h4 {
+            color: var(--dark-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .history-info p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .history-score {
+            text-align: right;
+        }
+
+        .score-display {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .score-status {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">📚 Exam Portal</div>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="results.html">Results</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="profile-container">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="profile-image" id="profile-image">
+                    <span>👤</span>
+                </div>
+
+                <div class="profile-info">
+                    <h3 id="profile-name">Loading...</h3>
+                    <p id="profile-email">Loading...</p>
+                    <p id="profile-role">Loading...</p>
+                    <p id="profile-joined">Loading...</p>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="number" id="total-exams-stat">0</div>
+                        <div class="label">Exams Taken</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="average-score-stat">0%</div>
+                        <div class="label">Average Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="completed-exams-stat">0</div>
+                        <div class="label">Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="best-score-stat">0%</div>
+                        <div class="label">Best Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-content">
+                <div class="tabs">
+                    <button class="tab active" onclick="profileManager.showTab('edit-profile')">Edit Profile</button>
+                    <button class="tab" onclick="profileManager.showTab('change-password')">Change Password</button>
+                    <button class="tab" onclick="profileManager.showTab('exam-history')">Exam History</button>
+                </div>
+
+                <!-- Edit Profile Tab -->
+                <div id="edit-profile-tab" class="tab-content active">
+                    <h2>Edit Profile Information</h2>
+
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="edit-fullname">Full Name</label>
+                            <input type="text" id="edit-fullname" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-email">Email Address</label>
+                            <input type="email" id="edit-email" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-username">Username</label>
+                            <input type="text" id="edit-username" class="form-control" required>
+                            <small style="color: #666;">Username cannot be changed after registration.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profile-image-upload">Profile Picture</label>
+                            <input type="file" id="profile-image-upload" accept="image/*">
+                            <small style="color: #666;">Maximum file size: 2MB. Accepted formats: JPG, PNG, GIF</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+
+                <!-- Change Password Tab -->
+                <div id="change-password-tab" class="tab-content">
+                    <h2>Change Password</h2>
+
+                    <form id="password-form">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" class="form-control" required>
+                            <div class="password-strength" id="password-strength"></div>
+                            <small style="color: #666;">Password must be at least 8 characters with uppercase, lowercase, and numbers.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirm New Password</label>
+                            <input type="password" id="confirm-new-password" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+
+                <!-- Exam History Tab -->
+                <div id="exam-history-tab" class="tab-content">
+                    <h2>Exam History</h2>
+
+                    <div class="exam-history" id="exam-history-list">
+                        <div style="text-align: center; padding: 2rem;">
+                            <div class="loading"></div>
+                            <p>Loading exam history...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Alert Modal -->
+    <div class="modal" id="alert-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="alert-title">Notification</h2>
+            </div>
+            <div class="modal-body">
+                <p id="alert-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Exam Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Admin specific styles */
+        .admin-header {
+            background: linear-gradient(135deg, var(--danger-color), #c0392b);
+        }
+
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card h3 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-time {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .activity-user {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-color);
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--background-color);
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--background-color);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-bar select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 0.75rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            border-color: var(--primary-color);
+        }
+
+        .pagination button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="container">
+            <div class="logo">📚 Exam Portal (Admin)</div>
+            <nav>
+                <ul>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                    <li><a href="#" onclick="adminManager.showTab('users')">Users</a></li>
+                    <li><a href="#" onclick="adminManager.showTab('exams')">Exams</a></li>
+                    <li><a href="#" onclick="adminManager.showTab('results')">Results</a></li>
+                    <li><a href="#" onclick="adminManager.showTab('reports')">Reports</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome, <span id="admin-name">Administrator</span>! Manage your exam system here.</p>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content active">
+            <!-- Statistics -->
+            <section class="stats-section">
+                <h2 class="section-title">System Overview</h2>
+                <div class="admin-stats-grid">
+                    <div class="stat-card">
+                        <h3 id="total-users">0</h3>
+                        <p>Total Users</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="active-exams">0</h3>
+                        <p>Active Exams</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="total-attempts">0</h3>
+                        <p>Exam Attempts</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="completion-rate">0%</h3>
+                        <p>Completion Rate</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="quick-actions">
+                <a href="#" class="action-card" onclick="adminManager.showCreateUserModal()">
+                    <div class="icon">👤</div>
+                    <h3>Add User</h3>
+                    <p>Create new user account</p>
+                </a>
+                <a href="#" class="action-card" onclick="adminManager.showCreateExamModal()">
+                    <div class="icon">📝</div>
+                    <h3>Create Exam</h3>
+                    <p>Set up new examination</p>
+                </a>
+                <a href="#" class="action-card" onclick="adminManager.showTab('users')">
+                    <div class="icon">👥</div>
+                    <h3>Manage Users</h3>
+                    <p>View and edit users</p>
+                </a>
+                <a href="#" class="action-card" onclick="adminManager.showTab('exams')">
+                    <div class="icon">📚</div>
+                    <h3>Manage Exams</h3>
+                    <p>Edit existing exams</p>
+                </a>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="recent-activity">
+                <h2 class="section-title">Recent Activity</h2>
+                <div id="recent-activity-list">
+                    <div class="activity-item">
+                        <div class="activity-info">
+                            <div>Loading recent activities...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users-tab" class="tab-content">
+            <h2 class="section-title">User Management</h2>
+
+            <div class="search-bar">
+                <input type="text" id="user-search" placeholder="Search users..." class="form-control">
+                <select id="user-role-filter" class="form-control">
+                    <option value="">All Roles</option>
+                    <option value="student">Students</option>
+                    <option value="admin">Administrators</option>
+                </select>
+                <button class="btn btn-primary" onclick="adminManager.searchUsers()">Search</button>
+                <button class="btn btn-secondary" onclick="adminManager.showCreateUserModal()">Add User</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="8" style="text-align: center;">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="users-pagination">
+                <!-- Pagination will be generated here -->
+            </div>
+        </div>
+
+        <!-- Exams Tab -->
+        <div id="exams-tab" class="tab-content">
+            <h2 class="section-title">Exam Management</h2>
+
+            <div class="search-bar">
+                <input type="text" id="exam-search" placeholder="Search exams..." class="form-control">
+                <select id="exam-status-filter" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <button class="btn btn-primary" onclick="adminManager.searchExams()">Search</button>
+                <button class="btn btn-secondary" onclick="adminManager.showCreateExamModal()">Create Exam</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Created By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exams-table-body">
+                        <tr>
+                            <td colspan="8" style="text-align: center;">Loading exams...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="exams-pagination">
+                <!-- Pagination will be generated here -->
+            </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="results-tab" class="tab-content">
+            <h2 class="section-title">Results Management</h2>
+
+            <div class="search-bar">
+                <input type="text" id="result-search" placeholder="Search results..." class="form-control">
+                <select id="result-exam-filter" class="form-control">
+                    <option value="">All Exams</option>
+                </select>
+                <button class="btn btn-primary" onclick="adminManager.searchResults()">Search</button>
+            </div>
+
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Attempt ID</th>
+                            <th>Student</th>
+                            <th>Exam</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                            <th>Completed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table-body">
+                        <tr>
+                            <td colspan="8" style="text-align: center;">Loading results...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="results-pagination">
+                <!-- Pagination will be generated here -->
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-content">
+            <h2 class="section-title">System Reports</h2>
+
+            <div class="quick-actions">
+                <a href="#" class="action-card" onclick="adminManager.generateReport('users')">
+                    <div class="icon">👥</div>
+                    <h3>User Report</h3>
+                    <p>Export all user data</p>
+                </a>
+                <a href="#" class="action-card" onclick="adminManager.generateReport('exams')">
+                    <div class="icon">📝</div>
+                    <h3>Exam Report</h3>
+                    <p>Export exam statistics</p>
+                </a>
+                <a href="#" class="action-card" onclick="adminManager.generateReport('results')">
+                    <div class="icon">📊</div>
+                    <h3>Results Report</h3>
+                    <p>Export all results</p>
+                </a>
+                <a href="#" class="action-card" onclick="adminManager.generateReport('activity')">
+                    <div class="icon">📈</div>
+                    <h3>Activity Report</h3>
+                    <p>System activity log</p>
+                </a>
+            </div>
+
+            <div id="report-content" style="margin-top: 2rem;">
+                <div class="alert alert-info">
+                    Select a report type above to generate and export data.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Create User Modal -->
+    <div class="modal" id="create-user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New User</h2>
+            </div>
+            <div class="modal-body">
+                <form id="create-user-form">
+                    <div class="form-group">
+                        <label for="new-user-fullname">Full Name</label>
+                        <input type="text" id="new-user-fullname" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-username">Username</label>
+                        <input type="text" id="new-user-username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-email">Email</label>
+                        <input type="email" id="new-user-email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-password">Password</label>
+                        <input type="password" id="new-user-password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-role">Role</label>
+                        <select id="new-user-role" class="form-control" required>
+                            <option value="student">Student</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="adminManager.closeModal('create-user-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="adminManager.createUser()">Create User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Exam Modal -->
+    <div class="modal" id="create-exam-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Exam</h2>
+            </div>
+            <div class="modal-body">
+                <form id="create-exam-form">
+                    <div class="form-group">
+                        <label for="new-exam-title">Exam Title</label>
+                        <input type="text" id="new-exam-title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-description">Description</label>
+                        <textarea id="new-exam-description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-duration">Duration (minutes)</label>
+                        <input type="number" id="new-exam-duration" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-total-marks">Total Marks</label>
+                        <input type="number" id="new-exam-total-marks" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-passing-marks">Passing Marks</label>
+                        <input type="number" id="new-exam-passing-marks" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-start-time">Start Time</label>
+                        <input type="datetime-local" id="new-exam-start-time" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-end-time">End Time</label>
+                        <input type="datetime-local" id="new-exam-end-time" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-exam-status">Status</label>
+                        <select id="new-exam-status" class="form-control" required>
+                            <option value="draft">Draft</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="active">Active</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="adminManager.closeModal('create-exam-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="adminManager.createExam()">Create Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal" id="alert-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="alert-title">Notification</h2>
+            </div>
+            <div class="modal-body">
+                <p id="alert-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
