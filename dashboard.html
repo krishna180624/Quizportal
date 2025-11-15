@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Exam Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">📚 Exam Portal</div>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="results.html">Results</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <div class="dashboard-header">
+            <h1>Welcome, <span id="user-name">Student</span>!</h1>
+            <p>Here's your exam overview and upcoming activities</p>
+        </div>
+
+        <!-- Statistics Section -->
+        <section class="stats-section">
+            <h2 class="section-title">Your Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="total-exams">0</h3>
+                    <p>Total Exams</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="completed-exams">0</h3>
+                    <p>Completed Exams</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="average-score">0%</h3>
+                    <p>Average Score</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="upcoming-exams">0</h3>
+                    <p>Upcoming Exams</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming Exams Section -->
+        <section class="upcoming-section">
+            <h2 class="section-title">Upcoming Exams</h2>
+            <div class="exam-grid" id="upcoming-exams-grid">
+                <!-- Exams will be loaded here -->
+                <div class="no-exams-message">
+                    <p>No upcoming exams scheduled.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Exams Section -->
+        <section class="active-section">
+            <h2 class="section-title">Available Exams</h2>
+            <div class="exam-grid" id="active-exams-grid">
+                <!-- Exams will be loaded here -->
+                <div class="no-exams-message">
+                    <p>No active exams available.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Results Section -->
+        <section class="results-section">
+            <h2 class="section-title">Recent Results</h2>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Exam</th>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-results-table">
+                        <!-- Results will be loaded here -->
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No recent results available.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Indicator -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Loading your dashboard...</p>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal" id="alert-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="alert-title">Notification</h2>
+            </div>
+            <div class="modal-body">
+                <p id="alert-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="confirm-title">Confirm Action</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+                <button class="btn btn-primary" id="confirm-ok">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
