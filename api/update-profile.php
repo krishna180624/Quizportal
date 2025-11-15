@@ -59,7 +59,7 @@ try {
 
     // Handle profile image upload
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-        $uploadResult = $this->handleProfileImageUpload($_FILES['profile_image'], $userId);
+        $uploadResult = handleProfileImageUpload($_FILES['profile_image'], $userId);
 
         if ($uploadResult['success']) {
             $updateData['profile_image'] = $uploadResult['filename'];
